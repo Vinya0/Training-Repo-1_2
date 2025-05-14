@@ -33,3 +33,4 @@ ele.send_keys(Keys.BACKSPACE)
 # Step 4: Enter "admin1234" in the password field
 driver.find_element(By.NAME, "password").send_keys("admin1234")
 time.sleep(2)
+

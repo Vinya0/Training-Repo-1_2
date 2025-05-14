@@ -17,14 +17,14 @@ driver.find_element(By.XPATH, "//button[@type='submit']").click()
 # Step 4: Check for username "Required" message
 error_username = driver.find_element(By.XPATH, "(//span[@class=\'oxd-text oxd-text--span oxd-input-field-error-message oxd-input-group__message\'])[1]")
 print("Username error message:", error_username.text)
-assert "Requir" in error_username.text, "Expected 'Required' but got '{error_username.text}'"
+assert "Required" == error_username.text, "Expected 'Required' but got '{error_username.text}'"
 
 time.sleep(1)
 
 # Step 5: Check for password "Required" message
 error_password = driver.find_element(By.XPATH, "(//span[@class=\'oxd-text oxd-text--span oxd-input-field-error-message oxd-input-group__message\'])[2]")
 print("Password error message:", error_password.text)
-assert "Required" in error_password.text, "Expected 'Required' but got '{error_password.text}'"
+assert "Require" == error_password.text, "Expected 'Required' but got '{error_password.text}'"
 
 # time.sleep(2)
 # driver.quit()
