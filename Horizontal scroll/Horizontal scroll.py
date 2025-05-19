@@ -2,20 +2,31 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 
-# Launch browser
+# Step 1: Launch browser and open the webpage
 driver = webdriver.Chrome()
-driver.get("https://practice.expandtesting.com/scrollbars")
 driver.maximize_window()
+driver.get("https://dev.webelight.co.in/services/custom-software-development")
+time.sleep(3)
+
+# Step 2: Scroll down to the horizontal scroll section
+scroll = driver.find_element(By.XPATH, '//span[normalize-space()="More"]')
+driver.execute_script("arguments[0].scrollIntoView();", scroll)
 time.sleep(2)
 
-# Scroll into view if needed
-scroll_button = driver.find_element(By.ID, "hscroll-right")
-driver.execute_script("arguments[0].scrollIntoView();", scroll_button)
+# Step 3: Find the right arrow for horizontal scroll
+right_arrow = driver.find_element(By.XPATH, '//img[@alt="right_active"]')
 
-# Click the right scroll button multiple times
-for _ in range(5):  # adjust the range as needed
-    scroll_button.click()
-    time.sleep(0.5)  # small delay to see scrolling effect
+# Step 4: Click the right arrow 4 times
+for _ in range(5):
+    right_arrow.click()
+    time.sleep(1)
 
-time.sleep(2)
+
+# Step 5: Find and click the left arrow 4 times
+left_arrow = driver.find_element(By.XPATH, '//img[@alt="left_active"]')
+for _ in range(5):
+    left_arrow.click()
+    time.sleep(1)
+
+# Optional: Close browser
 driver.quit()
