@@ -1,75 +1,49 @@
-# import pytest
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.common.by import By
-#
-# class TestClass:
-#     @pytest.mark.parametrize('user,pwd',
-#                              [("Admin","admin123"),
-#                               ("adm","admin123"),
-#                               ("Admin","adm"),
-#                               ("adm","adm")
-#                               ]
-#                              )
-#     def test_Login(self,user,pwd):
-#         # self.serv_obj=Service("C:\\Drivers\\chromedriver_win32\\chromedriver.exe")
-#         self.driver=webdriver.Chrome()
-#         self.driver.get("https://opensource-demo.orangehrmlive.com/web/index.php/auth/login/")
-#         self.driver.find_element(By.NAME, "Username").send_keys(user)
-#         self.driver.find_element(By.NAME, "Password").send_keys(pwd)
-#         self.driver.find_element(By.XPATH, "//*[@id=app]/div[1]/div/div[1]/div/div[2]/div[2]/form/div[3]/button").click()
-#         try:
-#             self.status=self.driver.find_element(By.XPATH,"//*[@id=app]/div[1]/div[1]/header/div[1]/div[1]/span/h6").is_displayed()
-#             self.driver.close()
-#             assert self.status==True
-#         except:
-#             self.driver.close()
-#             assert False
 import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import time
 
-class TestClass:
-    @pytest.mark.parametrize('user,pwd',
-                             [("Admin","admin123"),
-                              ("adm","admin123"),
-                              ("Admin","adm"),
-                              ("adm","adm")
-                              ]
-                             )
-    def test_Login(self, user, pwd):
-        # Set the path to chromedriver executable if needed
-        # For example:
-        # service_obj = Service("C:\\Drivers\\chromedriver_win32\\chromedriver.exe")
-        # driver = webdriver.Chrome(service=service_obj)
-
-        driver = webdriver.Chrome()  # Use this if chromedriver is in PATH
+class TestLogin:
+    @pytest.mark.parametrize('user,pwd,should_pass', [
+        ("Admin", "admin123", True),    # Valid credentials
+        ("adm", "admin123", False),     # Invalid username
+        ("Admin", "adm", False),        # Invalid password
+        ("adm", "adm", False),          # Both invalid
+        ("", "", False)                 # Both empty
+    ])
+    def test_login(self, user, pwd, should_pass):
+        driver = webdriver.Chrome()
         driver.get("https://opensource-demo.orangehrmlive.com/")
-
         wait = WebDriverWait(driver, 10)
 
-        # Corrected locator names to lowercase
-        username_input = wait.until(EC.presence_of_element_located((By.NAME, "username")))
-        password_input = driver.find_element(By.NAME, "password")
+        username = wait.until(EC.presence_of_element_located((By.NAME, "username")))
+        password = driver.find_element(By.NAME, "password")
 
-        username_input.clear()
-        username_input.send_keys(user)
-        password_input.clear()
-        password_input.send_keys(pwd)
+        username.clear()
+        username.send_keys(user)
+        password.clear()
+        password.send_keys(pwd)
 
-        login_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-        login_button.click()
+        login_btn = driver.find_element(By.XPATH, "//button[@type='submit']")
+        login_btn.click()
 
-        try:
-            # Wait for the element that appears after successful login
-            dashboard_header = wait.until(
-                EC.visibility_of_element_located((By.XPATH, "//h6[text()='Dashboard']"))
-            )
-            assert dashboard_header.is_displayed()
-        except:
-            assert False
-        finally:
-            driver.quit()
+        time.sleep(2)  # wait for response
+
+        if should_pass:
+            dashboard = wait.until(EC.visibility_of_element_located((By.XPATH, "//h6[text()='Dashboard']")))
+            print(f"Login successful for user: {user}")
+            assert dashboard.is_displayed()
+        elif user == "" and pwd == "":
+            errors = driver.find_elements(By.XPATH, "//span[text()='Required']")
+            print("Validation errors for empty fields:")
+            for e in errors:
+                print("-", e.text)
+            assert len(errors) >= 2
+        else:
+            toast = wait.until(EC.visibility_of_element_located((By.XPATH, "//p[contains(@class, 'oxd-alert-content-text')]")))
+            print("Toast message on invalid login:", toast.text)
+            assert "invalid credentials" in toast.text.lower()
+
+        driver.quit()
